@@ -1,7 +1,4 @@
--- =============================================
--- Extensions
--- =============================================
-create extension if not exists "uuid-ossp";
+-- gen_random_uuid() is built-in since PostgreSQL 13, no extension needed
 
 -- =============================================
 -- Profiles
@@ -37,7 +34,7 @@ create policy "관리자 전체 조회" on public.profiles
 -- Draws
 -- =============================================
 create table public.draws (
-  id           uuid primary key default uuid_generate_v4(),
+  id           uuid primary key default gen_random_uuid(),
   user_id      uuid references public.profiles on delete cascade not null,
   numbers      int[] not null,
   mode         text not null check (mode in ('random', 'manual', 'analysis', 'dream')),
@@ -64,7 +61,7 @@ create index draws_created_at_idx on public.draws(created_at desc);
 -- Point Transactions
 -- =============================================
 create table public.point_transactions (
-  id            uuid primary key default uuid_generate_v4(),
+  id            uuid primary key default gen_random_uuid(),
   user_id       uuid references public.profiles on delete cascade not null,
   type          text not null,
   amount        int not null,
@@ -84,7 +81,7 @@ create index point_tx_user_id_idx on public.point_transactions(user_id);
 -- Winning Numbers
 -- =============================================
 create table public.winning_numbers (
-  id               uuid primary key default uuid_generate_v4(),
+  id               uuid primary key default gen_random_uuid(),
   draw_no          int unique not null,
   numbers          int[] not null,
   bonus            int not null,
@@ -105,7 +102,7 @@ create index winning_draw_no_idx on public.winning_numbers(draw_no desc);
 -- Events
 -- =============================================
 create table public.events (
-  id           uuid primary key default uuid_generate_v4(),
+  id           uuid primary key default gen_random_uuid(),
   title        text not null,
   description  text,
   type         text not null check (type in ('point_reward', 'draw_bonus', 'ad_free')),
@@ -131,7 +128,7 @@ create policy "관리자 이벤트 관리" on public.events
 -- Event Participants
 -- =============================================
 create table public.event_participants (
-  id        uuid primary key default uuid_generate_v4(),
+  id        uuid primary key default gen_random_uuid(),
   event_id  uuid references public.events on delete cascade not null,
   user_id   uuid references public.profiles on delete cascade not null,
   joined_at timestamptz not null default now(),
@@ -147,7 +144,7 @@ create policy "본인 참여 이력 조회" on public.event_participants
 -- Dream Logs
 -- =============================================
 create table public.dream_logs (
-  id           uuid primary key default uuid_generate_v4(),
+  id           uuid primary key default gen_random_uuid(),
   user_id      uuid references public.profiles on delete cascade not null,
   dream_text   text not null,
   keywords     text[] not null default '{}',

@@ -313,17 +313,16 @@ max_frequency = "5s"
 # Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
 # `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
 # `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
-[auth.external.kakao]
-enabled = true
-client_id = "env(KAKAO_CLIENT_ID)"
-secret = "env(KAKAO_CLIENT_SECRET)"
-redirect_uri = ""
+# Kakao/Google OAuth는 Supabase 대시보드 > Authentication > Providers 에서 직접 설정
+# [auth.external.kakao]
+# enabled = true
+# client_id = "env(KAKAO_CLIENT_ID)"
+# secret = "env(KAKAO_CLIENT_SECRET)"
 
-[auth.external.google]
-enabled = true
-client_id = "env(GOOGLE_CLIENT_ID)"
-secret = "env(GOOGLE_CLIENT_SECRET)"
-redirect_uri = ""
+# [auth.external.google]
+# enabled = true
+# client_id = "env(GOOGLE_CLIENT_ID)"
+# secret = "env(GOOGLE_CLIENT_SECRET)"
 
 [auth.external.apple]
 enabled = false
