@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient, type CookieOptionsWithName } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
+
+type CookieItem = { name: string; value: string; options?: Record<string, unknown> }
 
 const PUBLIC_PATHS = ['/', '/login', '/callback', '/api/v1/public']
 
@@ -19,13 +21,13 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll()
         },
-        setAll(cookiesToSet: CookieOptionsWithName[]) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
+        setAll(cookiesToSet: CookieItem[]) {
+          cookiesToSet.forEach((cookie) =>
+            request.cookies.set(cookie.name, cookie.value)
           )
           response = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
+          cookiesToSet.forEach((cookie) =>
+            response.cookies.set(cookie.name, cookie.value, cookie.options as Record<string, unknown>)
           )
         },
       },

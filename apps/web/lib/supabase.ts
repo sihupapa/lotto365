@@ -1,6 +1,8 @@
-import { createServerClient as _createServerClient, type CookieOptionsWithName } from '@supabase/ssr'
+import { createServerClient as _createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from '@lotto/db'
+
+type CookieItem = { name: string; value: string; options?: Record<string, unknown> }
 
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies()
@@ -12,14 +14,12 @@ export async function createSupabaseServerClient() {
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(cookiesToSet: CookieOptionsWithName[]) {
+        setAll(cookiesToSet: CookieItem[]) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+            cookiesToSet.forEach((cookie) =>
+              cookieStore.set(cookie.name, cookie.value, cookie.options as Record<string, unknown>)
             )
-          } catch {
-            // Server Component에서 호출 시 무시
-          }
+          } catch {}
         },
       },
     }
