@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { createServerClient } from '@lotto/db'
-import { ok, fail } from '@/lib/response'
+import { createSupabaseServerClient } from '@/lib/supabase'
+import { ok, fail, unauthorized } from '@/lib/response'
 
 const eventSchema = z.object({
   title: z.string().min(1).max(100),
@@ -29,6 +30,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return unauthorized()
+
   const body = await req.json()
   const parsed = eventSchema.safeParse(body)
   if (!parsed.success) return fail(parsed.error.errors[0]?.message ?? '잘못된 요청입니다.')
@@ -36,7 +41,16 @@ export async function POST(req: NextRequest) {
   const client = createServerClient()
   const { data, error } = await client
     .from('events')
-    .insert({ ...parsed.data, created_by: body.admin_id })
+    .insert({
+      title: parsed.data.title,
+      description: parsed.data.description ?? null,
+      type: parsed.data.type,
+      reward_point: parsed.data.reward_point,
+      start_at: parsed.data.start_at,
+      end_at: parsed.data.end_at,
+      is_active: parsed.data.is_active,
+      created_by: user.id,
+    })
     .select()
     .single()
 
@@ -54,7 +68,18 @@ export async function PATCH(req: NextRequest) {
   if (!parsed.success) return fail('잘못된 요청입니다.')
 
   const client = createServerClient()
-  const { error } = await client.from('events').update(parsed.data).eq('id', id)
+  const { error } = await client
+    .from('events')
+    .update({
+      ...(parsed.data.title !== undefined && { title: parsed.data.title }),
+      ...(parsed.data.description !== undefined && { description: parsed.data.description }),
+      ...(parsed.data.type !== undefined && { type: parsed.data.type }),
+      ...(parsed.data.reward_point !== undefined && { reward_point: parsed.data.reward_point }),
+      ...(parsed.data.start_at !== undefined && { start_at: parsed.data.start_at }),
+      ...(parsed.data.end_at !== undefined && { end_at: parsed.data.end_at }),
+      ...(parsed.data.is_active !== undefined && { is_active: parsed.data.is_active }),
+    })
+    .eq('id', id)
 
   if (error) return fail('업데이트 실패')
   return ok({ updated: true })
