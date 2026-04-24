@@ -21,12 +21,14 @@ const MOCK_NOTICES: Notice[] = [
 const TYPE_LABEL: Record<string, string> = { popup: '팝업', banner: '배너', general: '일반' }
 const TYPE_VARIANT: Record<string, 'orange' | 'blue' | 'gray'> = { popup: 'orange', banner: 'blue', general: 'gray' }
 
-const EMPTY_FORM = { title: '', content: '', type: 'general' as const, is_active: true }
+type NoticeType = 'popup' | 'banner' | 'general'
+interface NoticeForm { title: string; content: string; type: NoticeType; is_active: boolean }
+const EMPTY_FORM: NoticeForm = { title: '', content: '', type: 'general', is_active: true }
 
 export default function NoticesPage() {
   const [notices, setNotices] = useState<Notice[]>(MOCK_NOTICES)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState(EMPTY_FORM)
+  const [form, setForm] = useState<NoticeForm>(EMPTY_FORM)
 
   function handleCreate() {
     const newNotice: Notice = {
@@ -131,7 +133,7 @@ export default function NoticesPage() {
                 <label className="text-xs text-gray-400 mb-1.5 block">유형</label>
                 <select
                   value={form.type}
-                  onChange={(e) => setForm({ ...form, type: e.target.value as 'popup' | 'banner' | 'general' })}
+                  onChange={(e) => setForm({ ...form, type: e.target.value as NoticeType })}
                   className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 text-sm"
                 >
                   <option value="general">일반</option>
