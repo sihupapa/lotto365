@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-
-type CookieItem = { name: string; value: string; options?: Record<string, unknown> }
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -26,10 +24,10 @@ export async function GET(request: NextRequest) {
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(cookiesToSet: CookieItem[]) {
+        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
           try {
             cookiesToSet.forEach((cookie) =>
-              cookieStore.set(cookie.name, cookie.value, cookie.options as Record<string, unknown>)
+              cookieStore.set(cookie.name, cookie.value, cookie.options)
             )
           } catch {}
         },
