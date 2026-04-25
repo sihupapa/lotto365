@@ -1,17 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
-
-const REDIRECT_URL =
-  typeof window !== 'undefined'
-    ? `${window.location.origin}/callback`
-    : ''
+import { createBrowserClient } from '@supabase/ssr'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState<string | null>(null)
@@ -20,10 +10,15 @@ export default function LoginPage() {
   async function signIn(provider: 'google' | 'kakao' | 'naver') {
     setLoading(provider)
     setError(null)
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    const redirectTo = `${window.location.origin}/callback`
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: REDIRECT_URL,
+        redirectTo,
         scopes: provider === 'kakao' ? 'profile_nickname profile_image' : undefined,
       },
     })
