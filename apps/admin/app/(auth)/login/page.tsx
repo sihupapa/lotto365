@@ -1,35 +1,49 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
-export default function AdminLoginPage() {
-  const router = useRouter()
+function LoginForm() {
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const err = searchParams.get('error')
+    if (err === 'unauthorized') {
+      setError('관리자 권한이 없습니다.')
+    }
+  }, [searchParams])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+      const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
 
-    if (error) {
-      setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+      if (authError) {
+        setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+        setLoading(false)
+        return
+      }
+
+      // 하드 리다이렉트 — 미들웨어가 쿠키를 올바르게 읽게 함
+      window.location.href = '/overview'
+    } catch {
+      setError('로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
       setLoading(false)
-      return
     }
-
-    router.push('/overview')
   }
 
   return (
@@ -82,5 +96,13 @@ export default function AdminLoginPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }
