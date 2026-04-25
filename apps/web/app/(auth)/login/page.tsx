@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import type { Provider } from '@supabase/supabase-js'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState<string | null>(null)
@@ -16,7 +17,7 @@ export default function LoginPage() {
     )
     const redirectTo = `${window.location.origin}/callback`
     const { error } = await supabase.auth.signInWithOAuth({
-      provider,
+      provider: provider as Provider,
       options: {
         redirectTo,
         scopes: provider === 'kakao' ? 'profile_nickname profile_image' : undefined,

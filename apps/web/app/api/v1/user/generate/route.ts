@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { generateRandom, validateManual, generateByAnalysis, buildWeights } from '@lotto/engine'
 import { interpretDream } from '@lotto/ai'
 import { createServerClient } from '@lotto/db'
+import type { Json } from '@lotto/db'
 import { getAuthUser, createSupabaseServerClient } from '@/lib/supabase'
 import { ok, fail, unauthorized } from '@/lib/response'
 
@@ -36,16 +37,16 @@ export async function POST(req: NextRequest) {
   // 포인트 확인
   const { data: profile } = await supabase
     .from('profiles')
-    .select('point_balance')
+    .select('*')
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.point_balance < cost) {
+  if (!profile || (profile.point_balance as number) < cost) {
     return fail('포인트가 부족합니다.', 402)
   }
 
   let numbers: number[][] = []
-  let meta: Record<string, unknown> = {}
+  let meta: Json = {}
 
   if (mode === 'random') {
     numbers = generateRandom(parsed.data.count)
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
     meta = { keywords: result.keywords, reasoning: result.reasoning }
   }
 
-  // 포인트 차감 + 번호 저장 (트랜잭션)
+  // 포인트 차감 + 번호 저장
   const serverClient = createServerClient()
   const draws = await Promise.all(
     numbers.map((nums) =>
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
     p_type: 'spend_draw',
   })
 
-  const remaining = profile.point_balance - cost
+  const remaining = (profile.point_balance as number) - cost
 
   return ok({
     draws: draws.map((d) => d.data),
