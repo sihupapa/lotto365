@@ -37,11 +37,11 @@ export async function POST(req: NextRequest) {
   // 포인트 확인
   const { data: profile } = await supabase
     .from('profiles')
-    .select('*')
+    .select('point_balance')
     .eq('id', user.id)
-    .single()
+    .single<{ point_balance: number }>()
 
-  if (!profile || (profile.point_balance as number) < cost) {
+  if (!profile || profile.point_balance < cost) {
     return fail('포인트가 부족합니다.', 402)
   }
 
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
     p_type: 'spend_draw',
   })
 
-  const remaining = (profile.point_balance as number) - cost
+  const remaining = profile.point_balance - cost
 
   return ok({
     draws: draws.map((d) => d.data),

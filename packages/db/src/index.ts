@@ -1,2 +1,2 @@
 export { createClient, createServerClient } from './client'
-export type { Database, Tables, TablesInsert, TablesUpdate } from './types'
+export type { Database, Json, Tables, TablesInsert, TablesUpdate } from './types'
