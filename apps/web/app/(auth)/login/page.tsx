@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  async function signIn(provider: 'google' | 'kakao' | 'naver') {
+  async function signIn(provider: 'google' | 'kakao') {
     setLoading(provider)
     setError(null)
     const supabase = createBrowserClient(
@@ -55,15 +55,6 @@ export default function LoginPage() {
           </button>
 
           <button
-            onClick={() => signIn('naver')}
-            disabled={loading !== null}
-            className="flex items-center justify-center gap-3 w-full py-3 px-4 bg-green-500 hover:bg-green-600 disabled:opacity-60 text-white font-semibold rounded-xl transition-colors"
-          >
-            <NaverIcon />
-            {loading === 'naver' ? '로그인 중...' : '네이버로 로그인'}
-          </button>
-
-          <button
             onClick={() => signIn('google')}
             disabled={loading !== null}
             className="flex items-center justify-center gap-3 w-full py-3 px-4 bg-white hover:bg-gray-50 disabled:opacity-60 text-gray-700 font-semibold rounded-xl border border-gray-200 transition-colors"
@@ -85,14 +76,6 @@ function KakaoIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 3C6.477 3 2 6.477 2 10.5c0 2.568 1.524 4.82 3.84 6.196L4.8 21l4.592-2.4C10.2 18.864 11.088 19 12 19c5.523 0 10-3.477 10-7.5S17.523 3 12 3z" />
-    </svg>
-  )
-}
-
-function NaverIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z" />
     </svg>
   )
 }
